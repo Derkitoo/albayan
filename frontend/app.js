@@ -53,6 +53,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // Command Palette (Ctrl + K)
+  const cmdPalette = document.getElementById('cmdPalette');
+  const cmdPaletteTrigger = document.getElementById('cmdPaletteTrigger');
+  const cmdInput = document.getElementById('cmdInput');
+
+  function openCmdPalette() {
+    cmdPalette.classList.add('open');
+    cmdInput.focus();
+  }
+
+  function closeCmdPalette() {
+    cmdPalette.classList.remove('open');
+  }
+
+  if (cmdPaletteTrigger) {
+    cmdPaletteTrigger.addEventListener('click', openCmdPalette);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      if (cmdPalette.classList.contains('open')) closeCmdPalette();
+      else openCmdPalette();
+    } else if (e.key === 'Escape') {
+      closeCmdPalette();
+    }
+  });
+
+  if (cmdInput) {
+    cmdInput.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+        const val = cmdInput.value.trim();
+        if (val) {
+          searchInput.value = val;
+          closeCmdPalette();
+          performSearch();
+        }
+      }
+    });
+  }
+
+  window.quickSelectTopic = (topic) => {
+    searchInput.value = topic;
+    closeCmdPalette();
+    performSearch();
+  };
+
   // LocalStorage Helpers
   function getBookmarks() {
     return JSON.parse(localStorage.getItem('sunnah_bookmarks') || '[]');
@@ -310,7 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       throw new Error('Mode statique GitHub Pages');
     } catch (err) {
-      // Full Static CDN Loader for all 34,500+ Hadiths on GitHub Pages!
       let targetCollections = [collection];
       if (collection === 'all' || collection === 'bookmarks') {
         targetCollections = ['nawawi', 'bukhari', 'muslim', 'tirmidhi', 'abudawud', 'nasai', 'ibnmajah'];
@@ -335,7 +381,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      // Limit results to 200 per search query in browser for performance
       return filtered.slice(0, 200);
     }
   }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Al-Bayan (البيان) - Suite d'Innovation Sunnah</title>
+  <title>Al-Bayan (البيان) - Plateforme Moderne Sunnah 2026</title>
   <link rel="manifest" href="./frontend/manifest.json">
   <meta name="theme-color" content="#059669">
   <link rel="stylesheet" href="./styles.css">
@@ -18,10 +18,13 @@
       <div class="logo-icon">ب</div>
       <div>
         <span class="logo-title">Al-Bayan</span>
-        <span class="tagline" id="uiTagline">| Suite d'Innovation Sunnah</span>
+        <span class="tagline" id="uiTagline">| Hadith Engine 2026</span>
       </div>
     </div>
     <div class="nav-controls">
+      <button class="cmd-trigger-btn" id="cmdPaletteTrigger">
+        🔍 <span>Recherche</span> <kbd>Ctrl</kbd> <kbd>K</kbd>
+      </button>
       <select class="lang-select" id="langSelector">
         <option value="fr">🇫🇷 FR</option>
         <option value="en">🇬🇧 EN</option>
@@ -31,6 +34,29 @@
       <button class="btn-toggle-theme" id="themeToggleBtn">🌙 Mode Sombre</button>
     </div>
   </header>
+
+  <!-- Command Palette Modal (Ctrl + K) -->
+  <div class="cmd-palette-overlay" id="cmdPalette">
+    <div class="cmd-palette-modal">
+      <div class="cmd-input-wrapper">
+        <span style="color: var(--primary-emerald); font-size: 1.2rem;">🔎</span>
+        <input type="text" id="cmdInput" class="cmd-input" placeholder="Taper une recherche ou commande (ex: 'intention', 'bukhari', 'nawawi')..." />
+        <kbd class="cmd-esc-tag">ESC</kbd>
+      </div>
+      <div class="cmd-results-list" id="cmdResults">
+        <div class="cmd-item" onclick="quickSelectTopic('intention')">💡 <span>Intention & Sincérité</span> <span class="cmd-badge">Concept</span></div>
+        <div class="cmd-item" onclick="quickSelectTopic('foi')">📖 <span>Foi & Croyance</span> <span class="cmd-badge">Concept</span></div>
+        <div class="cmd-item" onclick="quickSelectTopic('comportement')">💖 <span>Éthique & Comportement</span> <span class="cmd-badge">Concept</span></div>
+        <div class="cmd-item" onclick="quickSelectTopic('jeune')">🌙 <span>Jeûne & Ramadan</span> <span class="cmd-badge">Concept</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating PWA Install Toast -->
+  <div class="pwa-install-toast" id="pwaToast" style="display: none;">
+    <span>📱 Installer Al-Bayan sur votre écran d'accueil (Hors-ligne)</span>
+    <button class="btn-action" style="background: var(--primary-emerald); color: white; border: none;" id="pwaInstallBtn">Installer</button>
+  </div>
 
   <!-- Main Container -->
   <div class="container">
@@ -65,13 +91,13 @@
           type="text" 
           id="searchInput" 
           class="search-input" 
-          placeholder="🔎 Rechercher un mot, sujet ou concept (ex: 'intention', 'piliers', 'comportement', 'jeûne')..."
+          placeholder="🔎 Posez une question ou recherchez un concept (ex: 'intention', 'foi', 'comportement', 'jeûne')..."
         />
         <button class="search-btn" id="searchBtn">Rechercher</button>
       </div>
       <div class="search-meta">
-        <span id="searchStats">Moteur sémantique hybride déterministe (< 3 ms)</span>
-        <span class="badge-match-type" id="indexedCountBadge">📦 34 500+ Hadiths (SQLite)</span>
+        <span id="searchStats">Moteur sémantique déterministe ultra-rapide</span>
+        <span class="badge-match-type" id="indexedCountBadge">📦 34 574 Hadiths Indexés</span>
       </div>
     </div>
 
