@@ -1,0 +1,21 @@
+{
+  "short_name": "Sunnah.com",
+  "name": "Sunnah.com - Suite d'Innovation (Hadiths & Sharh)",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0d5c3a",
+  "theme_color": "#0d5c3a",
+  "display": "standalone",
+  "orientation": "portrait"
+}

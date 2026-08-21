@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunnah.com - Suite d'Innovation (PWA Hors-Ligne & Multi-Recueils)</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0d5c3a">
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-container">
+      <div>
+        <span class="logo-title">Sunnah.com</span>
+        <span class="tagline" id="uiTagline">| Recherche Sémantique & PWA Hors-Ligne</span>
+      </div>
+    </div>
+    <div class="nav-controls">
+      <select class="lang-select" id="langSelector">
+        <option value="fr">🇫🇷 Français</option>
+        <option value="en">🇬🇧 English</option>
+        <option value="ar">🇸🇦 العربية</option>
+      </select>
+      <button class="btn-mode-srs" id="srsToggleBtn">🧠 Mode Mémorisation (SRS)</button>
+      <button class="btn-toggle-theme" id="themeToggleBtn">🌙 Mode Sombre</button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+
+    <!-- Flashcard SRS Container -->
+    <div class="srs-container" id="srsCardContainer">
+      <h3 style="color: var(--primary-green); margin-bottom: 0.5rem;">🧠 Module de Mémorisation par Répétition Espacée</h3>
+      <p style="color: var(--text-muted); margin-bottom: 1rem;">Révisez les 40 Hadiths de Nawawi. Évaluez votre rétention pour ajuster les intervalles de révision.</p>
+      
+      <div class="srs-progress-bar">
+        <div class="srs-progress-fill" id="srsProgressFill"></div>
+      </div>
+
+      <div class="flashcard">
+        <div class="hadith-meta" id="srsMeta">Hadith #1</div>
+        <div class="flashcard-ar" id="srsTextAr">...</div>
+        <button class="btn-action" style="margin: 1rem 0;" id="srsRevealBtn">👁️ Afficher la Traduction</button>
+        <div class="flashcard-fr" id="srsTextFr">...</div>
+      </div>
+
+      <div class="srs-ratings" id="srsRatingsGroup">
+        <button class="btn-rate btn-rate-hard" onclick="rateSrsCard('hard')">🔴 À Revoir (1 jour)</button>
+        <button class="btn-rate btn-rate-good" onclick="rateSrsCard('good')">🟡 Moyen (3 jours)</button>
+        <button class="btn-rate btn-rate-easy" onclick="rateSrsCard('easy')">🟢 Maîtrisé (7 jours)</button>
+      </div>
+    </div>
+
+    <!-- Intelligent Search Bar -->
+    <div class="search-section" id="searchSection">
+      <div class="search-box-wrapper">
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="search-input" 
+          placeholder="🔎 Posez une question ou cherchez un concept (ex: 'intention', 'piliers de la foi', 'bon comportement', 'jeûne')..."
+        />
+        <button class="search-btn" id="searchBtn">Rechercher</button>
+      </div>
+      <div class="search-meta">
+        <span id="searchStats">Moteur de recherche hybride (Vectoriel + BM25) déterministe sur SQLite • Instantané (< 4 ms)</span>
+        <span class="badge-match-type" id="indexedCountBadge">📦 1 000+ Hadiths Indexés (SQLite)</span>
+      </div>
+    </div>
+
+    <!-- Topic Quick Pills Bar -->
+    <div class="topic-selector" id="topicPills">
+      <div class="topic-chip" data-topic="intention">💡 L'Intention & Sincérité</div>
+      <div class="topic-chip" data-topic="foi">📖 Foi & Croyance</div>
+      <div class="topic-chip" data-topic="comportement">💖 Bon Comportement & Éthique</div>
+      <div class="topic-chip" data-topic="jeune">🌙 Jeûne & Ramadan</div>
+      <div class="topic-chip" data-topic="prière">🤲 Prière & Devotion</div>
+      <div class="topic-chip" data-topic="revelation">📜 Révélation</div>
+    </div>
+
+    <!-- Collection Selector Filter -->
+    <div class="collection-selector" id="collectionChips">
+      <div class="chip active" data-id="all">📚 Tous les Recueils</div>
+      <div class="chip" data-id="bookmarks">⭐ Mes Favoris & Notes</div>
+      <div class="chip" data-id="nawawi">⭐ Les 40 Hadiths de Nawawi</div>
+      <div class="chip" data-id="bukhari">Sahih al-Bukhari</div>
+      <div class="chip" data-id="muslim">Sahih Muslim</div>
+      <div class="chip" data-id="tirmidhi">Jami` at-Tirmidhi</div>
+      <div class="chip" data-id="abudawud">Sunan Abu Dawud</div>
+      <div class="chip" data-id="nasai">Sunan an-Nasa'i</div>
+      <div class="chip" data-id="ibnmajah">Sunan Ibn Majah</div>
+    </div>
+
+    <!-- Export Bar (shows in Bookmarks view) -->
+    <div class="export-bar" id="exportBar" style="display: none;">
+      <button class="btn-action" style="background: var(--accent-gold); color: white; border: none;" id="exportMarkdownBtn">
+        📥 Exporter mes Favoris & Notes en Markdown (.md)
+      </button>
+    </div>
+
+    <!-- Hadith Container -->
+    <div id="hadithContainer">
+      <!-- Dynamic Hadith Cards inserted here -->
+    </div>
+
+  </div>
+
+  <!-- Floating Audio Player Bar -->
+  <div class="audio-player-bar" id="audioPlayerBar">
+    <div class="audio-info">
+      <span>🔊</span>
+      <span class="audio-title" id="audioPlayerTitle">Récitation Audio du Hadith</span>
+    </div>
+    <div class="audio-controls">
+      <audio id="mainAudioPlayer" controls style="height: 36px; outline: none;"></audio>
+      <button class="btn-close" id="closeAudioBtn">&times;</button>
+    </div>
+  </div>
+
+  <!-- Social Media Card Drawer -->
+  <div class="drawer-overlay" id="imageCardDrawer">
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <span>📸 Générateur de Carte Graphique (Réseaux Sociaux)</span>
+        </div>
+        <button class="btn-close" id="closeImageCardBtn">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+          Aperçu de la carte haute résolution prête à être partagée sur Instagram, WhatsApp ou X/Twitter.
+        </p>
+        
+        <div class="image-card-preview" id="cardPreviewArea">
+          <div class="card-logo">SUNNAH.COM</div>
+          <div class="card-ar" id="cardTextAr">...</div>
+          <div class="card-fr" id="cardTextFr">...</div>
+          <div class="card-ref" id="cardTextRef">...</div>
+        </div>
+
+        <button class="btn-sharh" style="width: 100%; justify-content: center; padding: 12px; font-size: 1rem;" id="downloadCardBtn">
+          📥 Copier / Partager l'Image
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Isnad & Rijal Drawer -->
+  <div class="drawer-overlay" id="isnadDrawer">
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <span>🕸️ Graphe de Transmission (*Isnad* & *'Ilm ar-Rijal*)</span>
+        </div>
+        <button class="btn-close" id="closeIsnadBtn">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+          Arbre généalogique de transmission du Hadith. Cliquez sur le nom d'un rapporteur pour afficher sa fiche biographique (*Tawahtheeq*).
+        </p>
+        <div id="isnadChainContainer" class="isnad-chain"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Takhrij & Variants Drawer -->
+  <div class="drawer-overlay" id="takhrijDrawer">
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <span>🔗 Concordance & Diff-Viewer (*Takhrij*)</span>
+        </div>
+        <button class="btn-close" id="closeTakhrijBtn">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <h4 style="margin-bottom: 1rem; color: var(--primary-green);">Versions parallèles dans les autres recueils (*Shawahid*) :</h4>
+        <div id="takhrijContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sharh Drawer -->
+  <div class="drawer-overlay" id="sharhDrawer">
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <span>📚 Exégèses Classiques (*Sharh*)</span>
+        </div>
+        <button class="btn-close" id="closeDrawerBtn">&times;</button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="drawer-tabs">
+        <button class="tab-btn active" data-tab="tab-summary">📌 Points Clés</button>
+        <button class="tab-btn" data-tab="tab-books">📖 Exégèses Classiques</button>
+        <button class="tab-btn" data-tab="tab-grammar">🔤 Vocabulaire & I'rab</button>
+        <button class="tab-btn" data-tab="tab-context">📜 Contexte (Asbab)</button>
+      </div>
+
+      <div class="drawer-body">
+        <div class="tab-pane active" id="tab-summary">
+          <div id="sharhOverallSummary" style="margin-bottom: 1.5rem; font-size: 1.05rem; font-weight: 500;">
+            Chargement...
+          </div>
+          <h4 style="margin-bottom: 1rem; color: var(--primary-green);">💡 Enseignements & Règles Extraction RAG :</h4>
+          <div id="keyInsightsList"></div>
+        </div>
+
+        <div class="tab-pane" id="tab-books">
+          <div id="commentaryBooksList"></div>
+        </div>
+
+        <div class="tab-pane" id="tab-grammar">
+          <div id="linguisticNotesList"></div>
+        </div>
+
+        <div class="tab-pane" id="tab-context">
+          <div id="asbabContent" style="line-height: 1.8; font-size: 1rem;"></div>
+        </div>
+
+        <div class="disclaimer-box" id="disclaimerBox">
+          ⚠️ <strong>Garde-fou Éthique :</strong> Les commentaires affichés proviennent exclusivement d'ouvrages classiques numérisés à des fins uniquement pédagogiques et académiques.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('Service Worker enregistré !', reg.scope))
+          .catch(err => console.log('Service Worker échoué :', err));
+      });
+    }
+  </script>
+</body>
+</html>

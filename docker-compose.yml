@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  sunnah-app:
+    build: .
+    container_name: sunnah_sharh_ai_container
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/sunnah.db:/app/backend/sunnah.db
+    restart: always
+    environment:
+      - PYTHONUNBUFFERED=1
