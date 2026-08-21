@@ -53,6 +53,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // PWA Install Prompt Handler
+  let deferredPrompt;
+  const pwaToast = document.getElementById('pwaToast');
+  const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (pwaToast) {
+      pwaToast.style.display = 'flex';
+    }
+  });
+
+  if (pwaInstallBtn) {
+    pwaInstallBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('Al-Bayan PWA installée avec succès');
+        }
+        deferredPrompt = null;
+        if (pwaToast) pwaToast.style.display = 'none';
+      } else {
+        alert("Pour installer Al-Bayan : utilisez l'option 'Ajouter à l'écran d'accueil' de votre navigateur.");
+      }
+    });
+  }
+
+  // iOS PWA Install Guidance Detection
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+  if (isIOS && !isStandalone && pwaToast) {
+    pwaToast.innerHTML = `
+      <span>📱 Pour installer <strong>Al-Bayan</strong> sur iOS : appuyez sur <strong>Partager ⎋</strong> puis <strong>"Sur l'écran d'accueil ➕"</strong></span>
+      <button class="btn-close" onclick="document.getElementById('pwaToast').style.display='none'">&times;</button>
+    `;
+    pwaToast.style.display = 'flex';
+  }
+
   // Command Palette (Ctrl + K)
   const cmdPalette = document.getElementById('cmdPalette');
   const cmdPaletteTrigger = document.getElementById('cmdPaletteTrigger');
