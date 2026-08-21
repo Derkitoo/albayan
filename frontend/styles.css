@@ -327,6 +327,8 @@ button.btn-mode-srs {
   padding: 1rem 1.25rem;
   box-shadow: var(--shadow-md);
   margin-bottom: 1.25rem;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .search-box-wrapper {
@@ -399,6 +401,8 @@ button.btn-mode-srs {
   gap: 10px;
   margin-top: 0.85rem;
   flex-wrap: wrap;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .collection-segmented-tabs {
@@ -407,16 +411,18 @@ button.btn-mode-srs {
   padding: 3px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
-  gap: 2px;
+  gap: 3px;
   overflow-x: auto;
+  white-space: nowrap;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   flex: 1;
+  max-width: 100%;
 }
 .collection-segmented-tabs::-webkit-scrollbar { display: none; }
 
 .seg-tab {
-  padding: 5px 11px;
+  padding: 6px 12px;
   border-radius: 6px;
   border: none;
   background: transparent;
@@ -425,6 +431,9 @@ button.btn-mode-srs {
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
   transition: all 0.15s ease;
 }
 
@@ -442,6 +451,7 @@ button.btn-mode-srs {
 .topic-select-wrapper {
   display: flex;
   align-items: center;
+  max-width: 100%;
 }
 
 .topic-select-menu {
@@ -454,6 +464,7 @@ button.btn-mode-srs {
   color: var(--text-secondary);
   cursor: pointer;
   outline: none;
+  max-width: 100%;
 }
 
 .topic-select-menu:hover {
@@ -471,6 +482,8 @@ button.btn-mode-srs {
   border-top: 1px dashed var(--border-color);
   font-size: 0.76rem;
   color: var(--text-muted);
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .corpus-badge {
@@ -479,6 +492,7 @@ button.btn-mode-srs {
   padding: 1px 8px;
   border-radius: 10px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 /* Compact & Sleek Hadith Card */
@@ -490,6 +504,7 @@ button.btn-mode-srs {
   margin-bottom: 1.25rem;
   box-shadow: var(--shadow-sm);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
 }
 
 .hadith-card:hover {
@@ -512,8 +527,10 @@ button.btn-mode-srs {
   color: var(--primary-emerald);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
+  max-width: 100%;
+  word-break: break-word;
 }
 
 .badge-grade {
@@ -523,6 +540,7 @@ button.btn-mode-srs {
   border-radius: 12px;
   font-weight: 700;
   font-size: 0.75rem;
+  flex-shrink: 0;
 }
 
 .badge-score {
@@ -532,6 +550,7 @@ button.btn-mode-srs {
   border-radius: 8px;
   font-weight: 700;
   font-size: 0.72rem;
+  flex-shrink: 0;
 }
 
 .badge-match-type {
@@ -541,6 +560,7 @@ button.btn-mode-srs {
   border-radius: 8px;
   font-weight: 600;
   font-size: 0.72rem;
+  flex-shrink: 0;
 }
 
 .arabic-text {
@@ -579,7 +599,8 @@ button.btn-mode-srs {
   color: var(--text-muted);
   font-style: italic;
   flex: 1;
-  min-width: 180px;
+  min-width: 160px;
+  word-break: break-word;
 }
 
 .action-buttons-group {
@@ -973,7 +994,7 @@ button.btn-mode-srs {
 }
 
 /* ==========================================================================
-   MOBILE & TABLET RESPONSIVE OVERHAUL (100% Mobile Ready)
+   MOBILE & TABLET RESPONSIVE OVERHAUL (100% Mobile Ready & No Text Overflow)
    ========================================================================== */
 
 @media (max-width: 640px) {
@@ -1008,7 +1029,7 @@ button.btn-mode-srs {
   }
 
   .search-hero {
-    padding: 0.85rem 0.9rem;
+    padding: 0.75rem 0.8rem;
     border-radius: var(--radius-md);
   }
 
@@ -1021,7 +1042,7 @@ button.btn-mode-srs {
   }
 
   .search-btn {
-    padding: 0.55rem 0.9rem;
+    padding: 0.55rem 0.85rem;
     font-size: 0.8rem;
   }
 
@@ -1031,6 +1052,20 @@ button.btn-mode-srs {
     gap: 8px;
   }
 
+  .collection-segmented-tabs {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 2px;
+  }
+
+  .seg-tab {
+    padding: 5px 9px;
+    font-size: 0.74rem;
+    flex-shrink: 0;
+  }
+
   .topic-select-wrapper {
     width: 100%;
   }
@@ -1038,32 +1073,51 @@ button.btn-mode-srs {
   .topic-select-menu {
     width: 100%;
     text-align: center;
+    font-size: 0.76rem;
   }
 
   .search-status-bar {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
+    font-size: 0.74rem;
   }
 
   .hadith-card {
-    padding: 1rem 1.1rem;
+    padding: 0.9rem 1rem;
     border-radius: var(--radius-md);
   }
 
+  .hadith-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .hadith-meta {
+    font-size: 0.82rem;
+    max-width: 70%;
+    word-break: break-word;
+  }
+
+  .badge-grade {
+    font-size: 0.72rem;
+    padding: 2px 6px;
+  }
+
   .arabic-text {
-    font-size: 1.3rem;
-    line-height: 1.9;
+    font-size: 1.25rem;
+    line-height: 1.85;
   }
 
   .translation-text {
-    font-size: 0.88rem;
+    font-size: 0.86rem;
   }
 
   .hadith-footer {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
   }
 
   .action-buttons-group {
@@ -1075,8 +1129,8 @@ button.btn-mode-srs {
 
   .btn-action, .btn-sharh {
     justify-content: center;
-    padding: 7px 6px;
-    font-size: 0.75rem;
+    padding: 7px 4px;
+    font-size: 0.74rem;
     width: 100%;
   }
 
