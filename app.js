@@ -135,9 +135,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const srsToggleBtn = document.getElementById('srsToggleBtn');
   const langSelector = document.getElementById('langSelector');
   const collectionChips = document.getElementById('collectionChips');
-  const topicPills = document.getElementById('topicPills');
+  const topicSelectMenu = document.getElementById('topicSelectMenu');
   const searchInput = document.getElementById('searchInput');
   const searchBtn = document.getElementById('searchBtn');
+  const searchClearBtn = document.getElementById('searchClearBtn');
   const searchStats = document.getElementById('searchStats');
   const exportBar = document.getElementById('exportBar');
   const exportMarkdownBtn = document.getElementById('exportMarkdownBtn');
@@ -266,39 +267,67 @@ document.addEventListener('DOMContentLoaded', () => {
   closeTakhrijBtn.addEventListener('click', () => takhrijDrawer.classList.remove('open'));
   closeImageCardBtn.addEventListener('click', () => imageCardDrawer.classList.remove('open'));
 
-  // Filter Chips
-  collectionChips.addEventListener('click', (e) => {
-    if (e.target.classList.contains('chip')) {
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      e.target.classList.add('active');
-      currentCollection = e.target.getAttribute('data-id');
+  // Segmented Tabs Click
+  if (collectionChips) {
+    collectionChips.addEventListener('click', (e) => {
+      if (e.target.classList.contains('seg-tab')) {
+        document.querySelectorAll('.seg-tab').forEach(c => c.classList.remove('active'));
+        e.target.classList.add('active');
+        currentCollection = e.target.getAttribute('data-id');
 
-      if (currentCollection === 'bookmarks') {
-        exportBar.style.display = 'flex';
-      } else {
-        exportBar.style.display = 'none';
+        if (currentCollection === 'bookmarks') {
+          exportBar.style.display = 'flex';
+        } else {
+          exportBar.style.display = 'none';
+        }
+
+        performSearch();
       }
+    });
+  }
 
+  // Topic Dropdown Select Menu
+  if (topicSelectMenu) {
+    topicSelectMenu.addEventListener('change', (e) => {
+      const selectedTopic = e.target.value;
+      if (selectedTopic) {
+        searchInput.value = selectedTopic;
+      } else {
+        searchInput.value = '';
+      }
       performSearch();
-    }
-  });
+    });
+  }
 
-  // Topic Pills Click
-  topicPills.addEventListener('click', (e) => {
-    if (e.target.classList.contains('topic-chip')) {
-      const topic = e.target.getAttribute('data-topic');
-      searchInput.value = topic;
-      performSearch();
-    }
-  });
+  // Search Event Listeners & Clear Button
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      if (searchInput.value.trim().length > 0) {
+        searchClearBtn.style.display = 'inline-block';
+      } else {
+        searchClearBtn.style.display = 'none';
+      }
+    });
 
-  // Search Event Listeners
-  searchBtn.addEventListener('click', performSearch);
-  searchInput.addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') {
+    searchInput.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+        performSearch();
+      }
+    });
+  }
+
+  if (searchClearBtn) {
+    searchClearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchClearBtn.style.display = 'none';
+      if (topicSelectMenu) topicSelectMenu.value = '';
       performSearch();
-    }
-  });
+    });
+  }
+
+  if (searchBtn) {
+    searchBtn.addEventListener('click', performSearch);
+  }
 
   // Fetch single collection dataset from CDN in static mode
   async function fetchStaticCollection(colId) {
