@@ -27,26 +27,27 @@
   --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 }
 
+/* Modern Soft Slate Dark Theme (Mode Sombre Doux & Confortable) */
 [data-theme="dark"] {
-  --primary-emerald: #10b981;
-  --primary-dark: #047857;
+  --primary-emerald: #34d399;
+  --primary-dark: #059669;
   --accent-gold: #fbbf24;
-  --gold-subtle: #451a03;
+  --gold-subtle: rgba(251, 191, 36, 0.12);
   
-  --bg-page: #0b0f19;
-  --card-bg: #151d2a;
-  --text-primary: #f8fafc;
+  --bg-page: #181f2c;
+  --card-bg: #212a3e;
+  --text-primary: #e2e8f0;
   --text-secondary: #cbd5e1;
   --text-muted: #64748b;
-  --border-color: #1e293b;
-  --input-bg: #1e293b;
+  --border-color: #2d374e;
+  --input-bg: #28334a;
   
-  --badge-sahih-bg: rgba(16, 185, 129, 0.15);
+  --badge-sahih-bg: rgba(52, 211, 153, 0.15);
   --badge-sahih-text: #34d399;
   
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.35);
 }
 
 * {
@@ -81,7 +82,7 @@ header {
 }
 
 [data-theme="dark"] header {
-  background-color: rgba(11, 15, 25, 0.85);
+  background-color: rgba(33, 42, 62, 0.88);
 }
 
 .logo-container {
@@ -184,7 +185,7 @@ header {
   background: var(--card-bg);
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
   overflow: hidden;
   transform: translateY(-10px);
   transition: transform 0.2s ease;
@@ -247,7 +248,7 @@ header {
 
 .cmd-badge {
   font-size: 0.7rem;
-  background: rgba(5, 150, 105, 0.1);
+  background: rgba(5, 150, 105, 0.15);
   color: var(--primary-emerald);
   padding: 2px 8px;
   border-radius: 10px;
@@ -301,8 +302,13 @@ button.btn-toggle-theme, button.btn-mode-srs {
 
 button.btn-mode-srs {
   background: var(--primary-emerald);
-  color: white;
+  color: #064e3b;
   border-color: var(--primary-emerald);
+  font-weight: 800;
+}
+
+[data-theme="dark"] button.btn-mode-srs {
+  color: #062b1b;
 }
 
 /* Container */
@@ -335,7 +341,7 @@ button.btn-mode-srs {
 
 .search-box-wrapper:focus-within {
   border-color: var(--primary-emerald);
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15);
 }
 
 .search-box-icon {
@@ -365,15 +371,19 @@ button.btn-mode-srs {
 
 .search-btn {
   background: linear-gradient(135deg, var(--primary-emerald), var(--primary-dark));
-  color: white;
+  color: #064e3b;
+  font-weight: 800;
   border: none;
   padding: 0.6rem 1.25rem;
   border-radius: var(--radius-sm);
-  font-weight: 700;
   font-size: 0.85rem;
   cursor: pointer;
   transition: opacity 0.18s ease;
   white-space: nowrap;
+}
+
+[data-theme="dark"] .search-btn {
+  color: #042f22;
 }
 
 .search-btn:hover {
@@ -423,7 +433,7 @@ button.btn-mode-srs {
 .seg-tab.active {
   background: var(--card-bg);
   color: var(--primary-emerald);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   font-weight: 700;
 }
 
@@ -462,7 +472,7 @@ button.btn-mode-srs {
 }
 
 .corpus-badge {
-  background: rgba(5, 150, 105, 0.1);
+  background: rgba(52, 211, 153, 0.12);
   color: var(--primary-emerald);
   padding: 1px 8px;
   border-radius: 10px;
@@ -482,7 +492,7 @@ button.btn-mode-srs {
 
 .hadith-card:hover {
   box-shadow: var(--shadow-md);
-  border-color: rgba(5, 150, 105, 0.3);
+  border-color: rgba(52, 211, 153, 0.35);
 }
 
 .hadith-header {
@@ -511,7 +521,7 @@ button.btn-mode-srs {
 }
 
 .badge-score {
-  background: rgba(217, 119, 6, 0.12);
+  background: rgba(251, 191, 36, 0.15);
   color: var(--accent-gold);
   padding: 1px 6px;
   border-radius: 8px;
@@ -520,7 +530,7 @@ button.btn-mode-srs {
 }
 
 .badge-match-type {
-  background: rgba(5, 150, 105, 0.1);
+  background: rgba(52, 211, 153, 0.12);
   color: var(--primary-emerald);
   padding: 1px 6px;
   border-radius: 8px;
@@ -587,24 +597,33 @@ button.btn-mode-srs {
 
 .btn-action:hover, .btn-action.bookmarked {
   background: var(--primary-emerald);
-  color: white;
+  color: #064e3b;
+  font-weight: 800;
   border-color: var(--primary-emerald);
+}
+
+[data-theme="dark"] .btn-action:hover, [data-theme="dark"] .btn-action.bookmarked {
+  color: #042f22;
 }
 
 .btn-sharh {
   background: linear-gradient(135deg, var(--primary-emerald), var(--primary-dark));
-  color: white;
+  color: #064e3b;
+  font-weight: 800;
   border: none;
   padding: 5px 12px;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-weight: 700;
   font-size: 0.76rem;
   display: flex;
   align-items: center;
   gap: 4px;
-  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
+  box-shadow: 0 2px 6px rgba(52, 211, 153, 0.2);
   transition: all 0.18s ease;
+}
+
+[data-theme="dark"] .btn-sharh {
+  color: #042f22;
 }
 
 .btn-sharh:hover {
@@ -662,7 +681,7 @@ button.btn-mode-srs {
 }
 
 [data-theme="dark"] .audio-player-bar {
-  background: rgba(21, 29, 42, 0.92);
+  background: rgba(33, 42, 62, 0.92);
 }
 
 .audio-player-bar.active {
@@ -694,7 +713,7 @@ button.btn-mode-srs {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(4px);
   z-index: 200;
   display: flex;
@@ -714,7 +733,7 @@ button.btn-mode-srs {
   max-width: 640px;
   height: 100vh;
   background: var(--card-bg);
-  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
