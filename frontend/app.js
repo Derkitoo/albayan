@@ -50,12 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Audio Player Elements
   const audioPlayerBar = document.getElementById('audioPlayerBar');
-  const mainAudioPlayer = document.getElementById('mainAudioPlayer');
   const audioPlayerTitle = document.getElementById('audioPlayerTitle');
   const closeAudioBtn = document.getElementById('closeAudioBtn');
 
   closeAudioBtn.addEventListener('click', () => {
-    mainAudioPlayer.pause();
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
     audioPlayerBar.classList.remove('active');
   });
 
@@ -216,9 +217,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await res.json();
         return data.results;
       }
-      throw new Error('API locale non détectée (Mode statique GitHub Pages)');
+      throw new Error('Mode statique GitHub Pages');
     } catch (err) {
-      // Fallback: Fetch directly from Fawaz Ahmed CDN for GitHub Pages static hosting
       if (!staticHadithsCache) {
         const [arRes, frRes] = await Promise.all([
           fetch('https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-nawawi.min.json'),
@@ -335,8 +335,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="hadith-footer">
           <div class="narrator-info">Rapporté par : ${h.narrator}</div>
           <div class="action-buttons-group">
-            <button class="btn-action" onclick="playHadithAudio('${h.collection_name} #${h.hadith_number}')">
-              🔊 Écouter
+            <button class="btn-action" onclick="playHadithAudioText('${h.collection_name} #${h.hadith_number}', \`${h.arabic_text.replace(/['"`]/g, " ")}\`)">
+              🔊 Écouter Hadith
             </button>
             <button class="btn-action ${isBookmarked ? 'bookmarked' : ''}" id="bmBtn-${hadithKey}" onclick="toggleBookmark('${hadithKey}')">
               ${isBookmarked ? '⭐ Enregistré' : '☆ Favori'}
@@ -363,12 +363,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Play Audio Simulation
-  window.playHadithAudio = (title) => {
-    audioPlayerTitle.textContent = `Récitation Audio : ${title}`;
-    mainAudioPlayer.src = "https://server8.mp3quran.net/afs/001.mp3";
+  // Authentic Hadith Speech Recitation (Web Speech API with Arabic Voice)
+  window.playHadithAudioText = (title, arabicText) => {
+    audioPlayerTitle.textContent = `🔊 Récitation du Hadith : ${title}`;
     audioPlayerBar.classList.add('active');
-    mainAudioPlayer.play();
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(arabicText);
+      utterance.lang = 'ar-SA';
+      utterance.rate = 0.85;
+
+      const voices = window.speechSynthesis.getVoices();
+      const arVoice = voices.find(v => v.lang.startsWith('ar'));
+      if (arVoice) {
+        utterance.voice = arVoice;
+      }
+
+      window.speechSynthesis.speak(utterance);
+    }
   };
 
   // Toggle Bookmark
