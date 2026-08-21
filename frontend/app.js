@@ -4,7 +4,54 @@ document.addEventListener('DOMContentLoaded', () => {
   let srsIndex = 0;
   let srsDeck = [];
   let masteredCount = 0;
-  let staticHadithsCache = null;
+  
+  // Cache for full collections in static mode
+  const collectionsCache = {};
+
+  const CDN_MAP = {
+    nawawi: {
+      ar: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-nawawi.min.json',
+      fr: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/fra-nawawi.min.json',
+      en: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-nawawi.min.json',
+      name: 'Les 40 Hadiths de Nawawi'
+    },
+    bukhari: {
+      ar: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-bukhari.min.json',
+      fr: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/fra-bukhari.min.json',
+      en: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-bukhari.min.json',
+      name: 'Sahih al-Bukhari'
+    },
+    muslim: {
+      ar: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-muslim.min.json',
+      fr: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/fra-muslim.min.json',
+      en: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-muslim.min.json',
+      name: 'Sahih Muslim'
+    },
+    abudawud: {
+      ar: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-abudawud.min.json',
+      fr: null,
+      en: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-abudawud.min.json',
+      name: 'Sunan Abu Dawud'
+    },
+    tirmidhi: {
+      ar: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-tirmidhi.min.json',
+      fr: null,
+      en: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-tirmidhi.min.json',
+      name: 'Jami` at-Tirmidhi'
+    },
+    nasai: {
+      ar: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-nasai.min.json',
+      fr: null,
+      en: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-nasai.min.json',
+      name: "Sunan an-Nasa'i"
+    },
+    ibnmajah: {
+      ar: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-ibnmajah.min.json',
+      fr: null,
+      en: 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-ibnmajah.min.json',
+      name: 'Sunan Ibn Majah'
+    }
+  };
 
   // LocalStorage Helpers
   function getBookmarks() {
@@ -146,10 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const isActive = srsCardContainer.classList.contains('active');
     if (isActive) {
       srsCardContainer.classList.remove('active');
-      srsToggleBtn.textContent = '🧠 Mode Mémorisation (SRS)';
+      srsToggleBtn.textContent = '🧠 Mémorisation';
     } else {
       srsCardContainer.classList.add('active');
-      srsToggleBtn.textContent = '❌ Quitter Mode Mémorisation';
+      srsToggleBtn.textContent = '❌ Quitter';
       startSrsDeck();
     }
   });
@@ -206,7 +253,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Fetch Hadiths Data with Fallback for GitHub Pages Static Mode
+  // Fetch single collection dataset from CDN in static mode
+  async function fetchStaticCollection(colId) {
+    if (collectionsCache[colId]) return collectionsCache[colId];
+
+    const config = CDN_MAP[colId] || CDN_MAP['nawawi'];
+    const fetchPromises = [fetch(config.ar)];
+    if (config.fr) fetchPromises.push(fetch(config.fr));
+    else fetchPromises.push(fetch(config.en));
+
+    const responses = await Promise.all(fetchPromises);
+    const arData = await responses[0].json();
+    const transData = await responses[1].json();
+
+    const hAra = arData.hadiths || [];
+    const hTrans = transData.hadiths || [];
+
+    const items = hAra.map((h, i) => {
+      const trItem = hTrans[i] || {};
+      const num = h.hadithnumber || (i + 1);
+      const textAr = h.text || '';
+      const textTr = trItem.text || textAr;
+
+      return {
+        score: 100,
+        match_type: "CDN Direct (GitHub Pages)",
+        hadith: {
+          collection_id: colId,
+          collection_name: config.name,
+          hadith_number: num,
+          chapter_title_fr: `${config.name} - Hadith #${num}`,
+          chapter_title_ar: `${config.name} - الحديث ${num}`,
+          arabic_text: textAr,
+          french_translation: textTr,
+          english_translation: textTr,
+          grade: "Sahih",
+          narrator: textAr.includes("عَنْ") ? textAr.split("قَالَ")[0] : "Rapporté par les Compagnons"
+        }
+      };
+    });
+
+    collectionsCache[colId] = items;
+    return items;
+  }
+
+  // Fetch Hadiths Data (FastAPI local or full static fallback)
   async function fetchHadithsData(query, collection) {
     try {
       const url = `/api/v1/search?q=${encodeURIComponent(query)}&collection=${collection === 'bookmarks' ? 'all' : collection}`;
@@ -219,54 +310,40 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       throw new Error('Mode statique GitHub Pages');
     } catch (err) {
-      if (!staticHadithsCache) {
-        const [arRes, frRes] = await Promise.all([
-          fetch('https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-nawawi.min.json'),
-          fetch('https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/fra-nawawi.min.json')
-        ]);
-        const arData = await arRes.json();
-        const frData = await frRes.json();
-
-        staticHadithsCache = arData.hadiths.map((h, i) => {
-          const frItem = frData.hadiths[i] || {};
-          const num = i + 1;
-          return {
-            score: 100,
-            match_type: "Recherche Déterministe (GitHub Pages)",
-            hadith: {
-              collection_id: "nawawi",
-              collection_name: "Les 40 Hadiths de Nawawi",
-              hadith_number: num,
-              chapter_title_fr: `Les 40 Hadiths de Nawawi - Hadith #${num}`,
-              chapter_title_ar: `الأربعون النواوية - الحديث ${num}`,
-              arabic_text: h.text,
-              french_translation: frItem.text || h.text,
-              english_translation: frItem.text || h.text,
-              grade: "Sahih",
-              narrator: h.text.includes("عَنْ") ? h.text.split("قَالَ")[0] : "Rapporté par les Compagnons"
-            }
-          };
-        });
+      // Full Static CDN Loader for all 34,500+ Hadiths on GitHub Pages!
+      let targetCollections = [collection];
+      if (collection === 'all' || collection === 'bookmarks') {
+        targetCollections = ['nawawi', 'bukhari', 'muslim', 'tirmidhi', 'abudawud', 'nasai', 'ibnmajah'];
       }
 
-      let filtered = staticHadithsCache;
+      let aggregated = [];
+      for (const colId of targetCollections) {
+        if (CDN_MAP[colId]) {
+          const items = await fetchStaticCollection(colId);
+          aggregated = aggregated.concat(items);
+        }
+      }
+
+      let filtered = aggregated;
       if (query) {
         const qLower = query.toLowerCase();
         filtered = filtered.filter(item => {
           const h = item.hadith;
           return h.arabic_text.includes(query) ||
-                 h.french_translation.toLowerCase().includes(qLower) ||
-                 h.chapter_title_fr.toLowerCase().includes(qLower);
+                 (h.french_translation && h.french_translation.toLowerCase().includes(qLower)) ||
+                 (h.chapter_title_fr && h.chapter_title_fr.toLowerCase().includes(qLower));
         });
       }
-      return filtered;
+
+      // Limit results to 200 per search query in browser for performance
+      return filtered.slice(0, 200);
     }
   }
 
   // Main Search Function
   async function performSearch() {
     const query = searchInput.value.trim();
-    hadithContainer.innerHTML = '<p style="text-align: center; margin: 2rem;">Recherche en cours...</p>';
+    hadithContainer.innerHTML = '<p style="text-align: center; margin: 2rem;">Chargement des Hadiths...</p>';
 
     try {
       let results = await fetchHadithsData(query, currentCollection);
@@ -276,11 +353,11 @@ document.addEventListener('DOMContentLoaded', () => {
         results = results.filter(r => bookmarks.includes(`${r.hadith.collection_id}:${r.hadith.hadith_number}`));
       }
 
-      searchStats.textContent = `${results.length} résultat(s) affiché(s) pour "${query || 'tous les Hadiths'}"`;
+      searchStats.textContent = `${results.length} Hadith(s) trouvé(s) dans la base pour "${query || 'tous les recueils'}"`;
 
       renderSearchResults(results);
     } catch (err) {
-      hadithContainer.innerHTML = `<div style="color: red;">Erreur de recherche: ${err.message}</div>`;
+      hadithContainer.innerHTML = `<div style="color: red; text-align: center; margin: 2rem;">Erreur : ${err.message}</div>`;
     }
   }
 
@@ -289,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     hadithContainer.innerHTML = '';
 
     if (!results || results.length === 0) {
-      hadithContainer.innerHTML = '<p style="text-align: center; margin: 2rem;">Aucun Hadith ne correspond à cette sélection.</p>';
+      hadithContainer.innerHTML = '<p style="text-align: center; margin: 2rem;">Aucun Hadith ne correspond à cette recherche.</p>';
       return;
     }
 
@@ -320,16 +397,16 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <span class="badge-grade">Grade: ${h.grade}</span>
         </div>
-        <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
           ${h.chapter_title_fr}
         </div>
         <div class="arabic-text">${h.arabic_text}</div>
         <div class="translation-text"><strong>${currentLanguage === 'en' ? 'Translation:' : 'Traduction :'}</strong> ${textTranslation}</div>
         
         <div class="user-notes-area ${savedNote ? 'active' : ''}" id="notesArea-${hadithKey}">
-          <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary-green);">📝 Note d'Étude Personnelle :</label>
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--primary-emerald);">📝 Note d'Étude Personnelle :</label>
           <textarea class="notes-input" id="noteInput-${hadithKey}" placeholder="Rédigez une note personnelle sur ce Hadith...">${savedNote}</textarea>
-          <button class="btn-action" style="padding: 4px 10px; font-size: 0.8rem;" onclick="saveHadithNote('${hadithKey}')">💾 Sauvegarder la Note</button>
+          <button class="btn-action" style="padding: 4px 10px; font-size: 0.78rem;" onclick="saveHadithNote('${hadithKey}')">💾 Sauvegarder la Note</button>
         </div>
 
         <div class="hadith-footer">
@@ -363,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Authentic Hadith Speech Recitation (Web Speech API with Arabic Voice)
+  // Authentic Hadith Speech Recitation
   window.playHadithAudioText = (title, arabicText) => {
     audioPlayerTitle.textContent = `🔊 Récitation du Hadith : ${title}`;
     audioPlayerBar.classList.add('active');
@@ -413,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
     alert("💾 Note d'étude enregistrée avec succès !");
   };
 
-  // --- SRS Memory Logic ---
+  // SRS Memory Logic
   async function startSrsDeck() {
     try {
       const results = await fetchHadithsData("", "nawawi");
@@ -462,7 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCurrentSrsCard();
   };
 
-  // Open Image Card Generator Drawer
+  // Open Image Card Drawer
   window.openImageCardDrawer = async (collectionId, hadithNumber) => {
     imageCardDrawer.classList.add('open');
     try {
@@ -479,10 +556,10 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   document.getElementById('downloadCardBtn').addEventListener('click', () => {
-    alert("✨ Carte graphique prête à être partagée sur vos réseaux sociaux (Instagram, WhatsApp, X/Twitter) !");
+    alert("✨ Carte graphique prête à être partagée sur vos réseaux sociaux !");
   });
 
-  // Open Isnad Chain Drawer
+  // Open Isnad Drawer
   window.openIsnadDrawer = async (collectionId, hadithNumber) => {
     const container = document.getElementById('isnadChainContainer');
     container.innerHTML = '<p>Chargement du graphe de transmission...</p>';
@@ -526,7 +603,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Open Takhrij & Diff Drawer
+  // Open Takhrij Drawer
   window.openTakhrijDrawer = async (collectionId, hadithNumber) => {
     const container = document.getElementById('takhrijContainer');
     container.innerHTML = '<p>Recherche des narrations parallèles...</p>';
@@ -543,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.className = 'takhrij-card';
             card.innerHTML = `
               <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                <strong style="color: var(--primary-green);">${p.collection} #${p.hadith_number}</strong>
+                <strong style="color: var(--primary-emerald);">${p.collection} #${p.hadith_number}</strong>
                 <span class="badge-grade">Grade: ${p.grade}</span>
               </div>
               <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem;">
@@ -594,7 +671,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const booksHtml = data.commentaries.map(b => `
           <div class="linguistic-item">
             <div class="term-header">
-              <span style="font-weight: 700; color: var(--primary-green); font-size: 1.1rem;">${b.book_name}</span>
+              <span style="font-weight: 700; color: var(--primary-emerald); font-size: 1.1rem;">${b.book_name}</span>
               <span class="badge-grade">${b.era}</span>
             </div>
             <div style="font-size: 0.9rem; font-style: italic; color: var(--text-muted); margin-bottom: 0.5rem;">
@@ -636,7 +713,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
       document.getElementById('commentaryBooksList').innerHTML = `
         <div class="linguistic-item">
-          <div class="term-header"><span style="font-weight: 700; color: var(--primary-green);">Sharh Sahih Muslim</span></div>
+          <div class="term-header"><span style="font-weight: 700; color: var(--primary-emerald);">Sharh Sahih Muslim</span></div>
           <div>Ouvrage de référence de l'Imam An-Nawawi (676 H).</div>
         </div>
       `;
